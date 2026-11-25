@@ -148,3 +148,57 @@ All runs remain preserved in [`experiments/mlflow.db`](file:///home/aryan/Docume
    # Returns: {'sentiment': 'neutral', 'confidence': 0.81, 'probabilities': {...}}
    ```
 3. **Integration with Streamlit:** This pipeline will plug directly into the planned Streamlit dashboard for real-time review inference, customer sentiment breakdown, and Power BI synchronization.
+
+## 3. Product Recommendation Engine Results
+
+- **Methodology**: Content-Based Filtering using TF-IDF (1-2 n-grams, 100,000 max features, sublinear term frequency) and NearestNeighbors with Cosine Distance on sparse vector space.
+- **Pairwise Matrix Optimization**: Brute-force cosine distance directly evaluated over sparse matrices (avoiding $O(N^2)$ memory explosion for dense matrices).
+- **Deployed Catalog Subset**: **60,000 products** exported to `data/products_sample.csv` (6.56 MB), well within the 30 MB Streamlit Community Cloud limit.
+- **Catalog Columns**: `parent_asin`, `product_title`, `category`, `main_category`, `price`, `avg_rating`, `review_count`.
+
+### Sanity-Check Validations (5 Test Cases)
+
+#### ASIN: B07N1572VL (Allure Beauty Box - The Best in Beauty Delivered M...)
+| Rank | Recommended Product | Category | Price | Similarity |
+|:---:|:---|:---|:---:|:---:|
+| 1 | Preschool2U Monthly Subscription Box | SUBSCRIPTION BOXES | $79.57 | **0.6046** |
+| 2 | LivingBetter50 Women's Monthly Subscription Box for Wom | SUBSCRIPTION BOXES | $47.31 | **0.5472** |
+| 3 | LearnWithMochi: Mochi Club STEM Monthly Subscription Bo | SUBSCRIPTION BOXES | $94.82 | **0.5069** |
+| 4 | Cross Box Wildlife Monthly Subscription Box | SUBSCRIPTION BOXES | $13.51 | **0.5068** |
+| 5 | Boujee Brown Monthly Beauty Subscription Box | SUBSCRIPTION BOXES | $88.03 | **0.5066** |
+
+#### ASIN: B00005NIOH (National Geographic Magazine...)
+| Rank | Recommended Product | Category | Price | Similarity |
+|:---:|:---|:---|:---:|:---:|
+| 1 | National Geographic Magazine | Magazine Subscriptions > Science, H | $93.65 | **1.0000** |
+| 2 | Id : Ideas & Discoveries    Print Magazine | Magazine Subscriptions > Science, H | $68.78 | **0.6868** |
+| 3 | National Geographic History    Print Magazine | Magazine Subscriptions > Science, H | $65.17 | **0.6636** |
+| 4 | National Geographic History    Print Magazine | Magazine Subscriptions > Science, H | $38.63 | **0.6193** |
+| 5 | National Geographic Magazine    Print Magazine | Magazine Subscriptions > Profession | $70.98 | **0.6024** |
+
+#### ASIN: B002PXVYEQ (Family Handyman    Print Magazine...)
+| Rank | Recommended Product | Category | Price | Similarity |
+|:---:|:---|:---|:---:|:---:|
+| 1 | Family Handyman    Print Magazine | Magazine Subscriptions > Home & Gar | $34.04 | **1.0000** |
+| 2 | Family Handyman    Print Magazine | Magazine Subscriptions > Home & Gar | $75.76 | **1.0000** |
+| 3 | Veranda    Print Magazine | Magazine Subscriptions > Home & Gar | $66.11 | **0.7415** |
+| 4 | Family Handyman    Print Magazine | Magazine Subscriptions > Home & Gar | $94.99 | **0.6885** |
+| 5 | Family Handyman    Print Magazine | Magazine Subscriptions > Home & Gar | $90.01 | **0.6885** |
+
+#### ASIN: B08YBGCNHP (SAMSUNG Genuine Filters for Refrigerator Water and...)
+| Rank | Recommended Product | Category | Price | Similarity |
+|:---:|:---|:---|:---:|:---:|
+| 1 | SAMSUNG Genuine Filters for Refrigerator Water and Ice, | Appliances > Parts & Accessories >  | $59.00 | **0.9328** |
+| 2 | SAMSUNG Genuine Filters for Refrigerator Water and Ice, | Appliances > Parts & Accessories >  | $75.00 | **0.7859** |
+| 3 | Dista - Refrigerator Water Filter Compatible with Samsu | Appliances > Parts & Accessories >  | $29.99 | **0.4286** |
+| 4 | Amana WF401 Clean N Clear Refrigerator Water Filter, 1- | Appliances > Parts & Accessories >  | $15.15 | **0.4128** |
+| 5 | Amana WF401P Clean N Clear Refrigerator Water Filter, 2 | Appliances > Parts & Accessories >  | $71.36 | **0.3865** |
+
+#### Query: 'Countertop Ice Maker Machine'
+| Rank | Recommended Product | Category | Price | Similarity |
+|:---:|:---|:---|:---:|:---:|
+| 1 | Portable Ice Maker, 26Lbs/24H Self-Cleaning Ice Maker M | Appliances > Refrigerators, Freezer | $45.01 | **0.4867** |
+| 2 | Emerson Portable Countertop Ice Maker Machine - IM93B ( | Appliances > Refrigerators, Freezer | $38.97 | **0.4633** |
+| 3 | Prime Home Direct Stainless Steel Countertop Ice Maker  | Appliances > Refrigerators, Freezer | $145.37 | **0.4508** |
+| 4 | Countertop Ice Maker, FREE VILLAGE Ice Maker Machine fo | Appliances > Refrigerators, Freezer | $110.49 | **0.4463** |
+| 5 | SOLTRONICS Portable Ice Maker 28LBS/24H, Countertop Ice | Appliances > Refrigerators, Freezer | $54.51 | **0.4392** |

@@ -41,13 +41,16 @@ data/processed/*.csv
 data/processed/*.parquet
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/products_sample.csv
 
 # ==============================================================================
 # Runtime Logs & Temp Files
 # ==============================================================================
 *.log
 mlruns/
+experiments/mlflow.db
+*.db
 .DS_Store
-Thumbs.db
+.Thumbs.db
 .idea/
 .vscode/

@@ -43,6 +43,8 @@ EXPERIMENTS_DIR.mkdir(parents=True, exist_ok=True)
 SENTIMENT_MODEL_PATH = MODELS_DIR / "sentiment_model.joblib"
 TFIDF_VECTORIZER_PATH = MODELS_DIR / "tfidf_vectorizer.joblib"
 SENTIMENT_PIPELINE_PATH = MODELS_DIR / "sentiment_pipeline.joblib"
+RECOMMENDER_MODEL_PATH = MODELS_DIR / "recommender.joblib"
+PRODUCTS_SAMPLE_CSV_PATH = DATA_DIR / "products_sample.csv"
 
 # ==============================================================================
 # 2. Database Configuration
