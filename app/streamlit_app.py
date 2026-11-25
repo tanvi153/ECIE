@@ -316,6 +316,36 @@ st.markdown(
         border-radius: 5px;
         font-weight: 600;
     }
+
+    /* Enhanced Large Sidebar Navigation Menu */
+    section[data-testid="stSidebar"] div[data-testid="stRadio"] > div {
+        gap: 0.65rem;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stRadio"] label {
+        background-color: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 10px;
+        padding: 12px 16px !important;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        width: 100%;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stRadio"] label:hover {
+        background-color: #EEF2F6;
+        border-color: #CBD5E1;
+        transform: translateX(2px);
+    }
+    section[data-testid="stSidebar"] div[data-testid="stRadio"] label p,
+    section[data-testid="stSidebar"] div[data-testid="stRadio"] label div,
+    section[data-testid="stSidebar"] div[data-testid="stRadio"] label span {
+        font-size: 1.15rem !important;
+        font-weight: 600 !important;
+        color: #0F172A !important;
+        line-height: 1.4 !important;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] label {
+        margin-bottom: 4px;
+    }
     </style>
     """,
     unsafe_allow_html=True,
