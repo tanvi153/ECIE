@@ -12,8 +12,13 @@ import argparse
 import html
 import os
 import re
+import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 import joblib
 import matplotlib.pyplot as plt
@@ -284,13 +289,13 @@ def train_and_evaluate(
     test_acc = accuracy_score(y_test, y_test_pred)
     acc_gap = (train_acc - test_acc) * 100
 
-    target_classes = ["negative", "neutral", "positive"]
+    target_classes = sorted(list(y.unique()))
     macro_f1 = f1_score(y_test, y_test_pred, average="macro")
     weighted_f1 = f1_score(y_test, y_test_pred, average="weighted")
 
-    precisions = precision_score(y_test, y_test_pred, labels=target_classes, average=None)
-    recalls = recall_score(y_test, y_test_pred, labels=target_classes, average=None)
-    f1s = f1_score(y_test, y_test_pred, labels=target_classes, average=None)
+    precisions = precision_score(y_test, y_test_pred, labels=target_classes, average=None, zero_division=0)
+    recalls = recall_score(y_test, y_test_pred, labels=target_classes, average=None, zero_division=0)
+    f1s = f1_score(y_test, y_test_pred, labels=target_classes, average=None, zero_division=0)
 
     cm = confusion_matrix(y_test, y_test_pred, labels=target_classes)
 
@@ -298,6 +303,8 @@ def train_and_evaluate(
     print("\n" + "=" * 70)
     print("               ECIE SENTIMENT MODEL EVALUATION REPORT")
     print("=" * 70)
+    print(f"Classes:            {target_classes} ({len(target_classes)}-class)")
+    print(f"Total Sample Size:  {len(df):,} reviews")
     print(f"Training Accuracy:  {train_acc:.4f} ({train_acc * 100:.2f}%)")
     print(f"Testing Accuracy:   {test_acc:.4f} ({test_acc * 100:.2f}%)")
     print(f"Train-Test Gap:     {acc_gap:.2f}% (Overfitting check)")
@@ -308,7 +315,7 @@ def train_and_evaluate(
         print(f"  - {cls_name.upper():<9} Precision: {p:.4f} | Recall: {r:.4f} | F1: {f:.4f}")
 
     print("\nDetailed Classification Report:")
-    print(classification_report(y_test, y_test_pred, digits=4, labels=target_classes))
+    print(classification_report(y_test, y_test_pred, digits=4, labels=target_classes, zero_division=0))
 
     print("\nConfusion Matrix (Rows=True, Columns=Predicted):")
     print(f"Labels: {target_classes}")
@@ -321,7 +328,7 @@ def train_and_evaluate(
     fig, ax = plt.subplots(figsize=(7, 6))
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=target_classes)
     disp.plot(cmap="Blues", ax=ax, values_format="d")
-    ax.set_title("ECIE Sentiment Analysis — Confusion Matrix\n(3-Class Stratified Amazon Reviews)")
+    ax.set_title(f"ECIE Sentiment Analysis — Confusion Matrix\n({len(target_classes)}-Class Stratified Amazon Reviews)")
     plt.tight_layout()
     plt.savefig(cm_output_path, dpi=300)
     plt.close(fig)
@@ -344,7 +351,7 @@ def train_and_evaluate(
     mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
     mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 
-    with mlflow.start_run(run_name="TFIDF_SGD_3Class_Stratified"):
+    with mlflow.start_run(run_name=f"TFIDF_SGD_{len(target_classes)}Class_500k"):
         # Log Hyperparameters
         mlflow.log_params({
             "model_type": "SGDClassifier(loss=modified_huber, class_weight=balanced)",
@@ -354,9 +361,10 @@ def train_and_evaluate(
             "sublinear_tf": True,
             "class_weight": "balanced",
             "sample_per_class": sample_per_class,
+            "total_samples": len(df),
             "random_state": random_state,
             "test_size": test_size,
-            "dataset_classes": "negative (1-2), neutral (3), positive (4-5)",
+            "dataset_classes": ", ".join(target_classes),
         })
 
         # Log Metrics
@@ -367,16 +375,11 @@ def train_and_evaluate(
             "train_test_gap": acc_gap,
             "macro_f1": macro_f1,
             "weighted_f1": weighted_f1,
-            "precision_negative": float(precisions[0]),
-            "precision_neutral": float(precisions[1]),
-            "precision_positive": float(precisions[2]),
-            "recall_negative": float(recalls[0]),
-            "recall_neutral": float(recalls[1]),
-            "recall_positive": float(recalls[2]),
-            "f1_negative": float(f1s[0]),
-            "f1_neutral": float(f1s[1]),
-            "f1_positive": float(f1s[2]),
         }
+        for cls_name, p, r, f in zip(target_classes, precisions, recalls, f1s):
+            metrics[f"precision_{cls_name}"] = float(p)
+            metrics[f"recall_{cls_name}"] = float(r)
+            metrics[f"f1_{cls_name}"] = float(f)
         mlflow.log_metrics(metrics)
 
         # Log Artifacts
