@@ -4,7 +4,7 @@ Production Web Application & Analytics Dashboard.
 
 Provides an enterprise-grade interactive interface for:
 1. Platform Overview: High-level KPI metrics, warehouse distributions, and system architecture.
-2. Review Intelligence & XAI: Real-time sentiment prediction with Explainable AI (word-level contribution highlighting).
+2. Review Intelligence & XAI: Real-time sentiment prediction with Explainable AI.
 3. Bulk Review Auditor: Batch CSV/Excel file ingestion, 1-click test datasets, interactive analytics, and report export.
 4. Smart Product Recommender: Hybrid content-based filtering with business-aware quality and rating re-ranking.
 """
@@ -123,7 +123,6 @@ def explain_review_decision(cleaned_text: str, pipeline) -> Dict:
         clf = pipeline.named_steps["clf"]
         feature_names = np.array(vec.get_feature_names_out())
 
-        # For binary linear classifier, coef_[0] represents the positive direction
         is_binary = clf.coef_.shape[0] == 1
         coefs = clf.coef_[0] if is_binary else clf.coef_
 
@@ -201,7 +200,6 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* Modern Enterprise Typography & Color Palette */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
     html, body, [class*="css"] {
@@ -318,80 +316,20 @@ st.markdown(
         border-radius: 5px;
         font-weight: 600;
     }
-
-    /* Product Recommendation Card */
-    .product-card {
-        background-color: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-radius: 10px;
-        padding: 1.1rem;
-        margin-bottom: 0.9rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    .product-card:hover {
-        border-color: #CBD5E1;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
-    }
-    .rating-pill {
-        background-color: #FEF3C7;
-        color: #92400E;
-        font-weight: 600;
-        font-size: 0.85rem;
-        padding: 3px 8px;
-        border-radius: 6px;
-        display: inline-block;
-    }
-    .price-pill {
-        background-color: #F1F5F9;
-        color: #0F172A;
-        font-weight: 700;
-        font-size: 0.9rem;
-        padding: 3px 8px;
-        border-radius: 6px;
-        display: inline-block;
-    }
-    .match-pill {
-        background-color: #EFF6FF;
-        color: #1E40AF;
-        font-weight: 600;
-        font-size: 0.85rem;
-        padding: 3px 8px;
-        border-radius: 6px;
-        display: inline-block;
-    }
-    .badge-toprated {
-        background-color: #DCFCE7;
-        color: #15803D;
-        font-weight: 700;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        padding: 2px 6px;
-        border-radius: 4px;
-        display: inline-block;
-        margin-left: 0.4rem;
-    }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
 # ==============================================================================
-# Top Brand Ribbon & Live System Status
+# Top Brand Ribbon
 # ==============================================================================
 st.markdown(
     """
     <div class="brand-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-            <div>
-                <h1 class="brand-title">Enterprise E-Commerce Intelligence Engine</h1>
-                <div class="brand-sub">Autonomous Customer Sentiment Analysis & Business-Aware Product Recommendations</div>
-            </div>
-            <div style="display: flex; gap: 8px; margin-top: 6px;">
-                <span style="background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(52, 211, 153, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">PostgreSQL: 3.1M Rows</span>
-                <span style="background: rgba(59, 130, 246, 0.15); color: #60A5FA; border: 1px solid rgba(96, 165, 250, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">Vectors: 60k Catalog</span>
-                <span style="background: rgba(168, 85, 247, 0.15); color: #C084FC; border: 1px solid rgba(192, 132, 252, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">Accuracy: 98.31%</span>
-            </div>
+        <div>
+            <h1 class="brand-title">Enterprise E-Commerce Intelligence Engine</h1>
+            <div class="brand-sub">Autonomous Customer Sentiment Analysis & Business-Aware Product Recommendations</div>
         </div>
     </div>
     """,
@@ -399,57 +337,30 @@ st.markdown(
 )
 
 # ==============================================================================
-# Sidebar - Engine Status & Controls
+# Sidebar - E-CIE Navigation
 # ==============================================================================
 with st.sidebar:
     st.image("https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/Python-Dark.svg", width=42)
-    st.markdown("### **E-CIE Navigation & Diagnostics**")
-    st.caption("B.Tech Capstone Demonstration | E-Commerce Intelligence Engine")
+    st.markdown("### **E-CIE Navigation**")
+    st.caption("Minor Project | E-Commerce Intelligence Engine")
 
     st.markdown("---")
-    st.markdown("#### **System Core Specifications**")
-    st.markdown(
-        """
-        - **NLP Classifier**: SGDClassifier (Modified Huber)
-        - **Feature Representation**: TF-IDF 1-2 N-grams (200k max features)
-        - **Holdout Test Accuracy**: **98.31%** (100,000 holdout reviews)
-        - **Generalization Gap**: **0.86%** (Train: 99.17% vs Test: 98.31%)
-        - **Recommender Matrix**: Sparse NearestNeighbors (Cosine Index)
-        - **Catalog Indexed**: 60,000 product entities
-        """
+    nav_selection = st.radio(
+        "Navigation Menu:",
+        [
+            "📊 Platform Overview",
+            "📝 Review Intelligence & XAI",
+            "📁 Bulk Review Auditor",
+            "🎯 Smart Product Recommender",
+        ],
+        index=0,
     )
 
-    st.markdown("---")
-    st.markdown("#### **Operational Health**")
-    sent_exists = SENTIMENT_MODEL_PATH.exists()
-    rec_exists = RECOMMENDER_MODEL_PATH.exists()
-    cat_exists = PRODUCTS_CSV_PATH.exists()
-
-    col_h1, col_h2 = st.columns(2)
-    with col_h1:
-        st.markdown(f"**NLP Engine**: {'🟢 Ready' if sent_exists else '🔴 Missing'}")
-        st.markdown(f"**Catalog Data**: {'🟢 Ready' if cat_exists else '🔴 Missing'}")
-    with col_h2:
-        st.markdown(f"**Recommender**: {'🟢 Ready' if rec_exists else '🔴 Missing'}")
-        st.markdown("**DB Mode**: 🟢 Decoupled")
-
-    st.markdown("---")
-    st.caption("Academic Project Submission | Evaluation Dec 3, 2026")
 
 # ==============================================================================
-# Application Tabs
+# VIEW 1: Platform Overview (Analytics Dashboard)
 # ==============================================================================
-tab_overview, tab_sentiment, tab_bulk, tab_recommender = st.tabs([
-    "📊 Platform Overview",
-    "📝 Review Intelligence & XAI",
-    "📁 Bulk Review Auditor",
-    "🎯 Smart Product Recommender",
-])
-
-# ==============================================================================
-# TAB 1: Platform Overview (Analytics Dashboard)
-# ==============================================================================
-with tab_overview:
+if nav_selection == "📊 Platform Overview":
     st.subheader("Platform Health & Warehouse Analytics")
     st.caption("Executive overview of ingested datasets, model benchmark metrics, and system distributions.")
 
@@ -551,14 +462,11 @@ with tab_overview:
 
 
 # ==============================================================================
-# TAB 2: Review Intelligence & Explainable AI (XAI)
+# VIEW 2: Review Intelligence & Explainable AI (XAI)
 # ==============================================================================
-with tab_sentiment:
+elif nav_selection == "📝 Review Intelligence & XAI":
     st.subheader("Customer Review Sentiment Classifier & Explainability Engine")
-    st.write(
-        "Evaluate customer feedback with transparent decision-making. "
-        "The **Explainable AI (XAI)** module highlights the exact token features that drove the prediction."
-    )
+    st.write("Evaluate customer feedback with transparent decision-making.")
 
     pipeline = load_sentiment_pipeline()
 
@@ -598,7 +506,6 @@ with tab_sentiment:
         if not cleaned_text:
             st.warning("Please provide valid alphabetic text for evaluation.")
         else:
-            # Predict label and confidence
             pred_label = pipeline.predict([cleaned_text])[0]
             classes = list(pipeline.classes_)
 
@@ -642,7 +549,7 @@ with tab_sentiment:
                 st.markdown("**Preprocessed Input Text:**")
                 st.code(cleaned_text, language="text")
 
-            # Suggestion 1: Explainable AI Word Highlighting
+            # Explainable AI Word Highlighting
             st.markdown("#### **Explainable AI (XAI): Feature Attribution Breakdown**")
             st.write(
                 "Words that increased **Positive** sentiment are highlighted in <span style='color:#15803D;font-weight:600;'>Green</span>; "
@@ -681,16 +588,15 @@ with tab_sentiment:
 
 
 # ==============================================================================
-# TAB 3: Bulk Review Auditor (Upload File & Batch Analytics)
+# VIEW 3: Bulk Review Auditor (Upload File & Batch Analytics)
 # ==============================================================================
-with tab_bulk:
+elif nav_selection == "📁 Bulk Review Auditor":
     st.subheader("Bulk Review Auditor & Batch Analytics")
     st.write(
         "Upload customer review datasets (`.csv`, `.xlsx`, `.tsv`) or load our standardized test batch "
         "to run rapid parallel inference and visualize sentiment proportions."
     )
 
-    # Pre-built sample batch of 25 customer reviews for instant viva demo
     SAMPLE_BATCH_REVIEWS = [
         "Incredible sound quality and ultra-comfortable ear pads. Worth every penny!",
         "Defective right out of the box. Stopped turning on after 2 hours. Returning.",
@@ -750,7 +656,6 @@ with tab_bulk:
             st.error(f"Error reading uploaded file: {e}")
 
     if df_to_audit is not None and not df_to_audit.empty:
-        # Detect text column
         text_cols = [
             c for c in df_to_audit.columns
             if any(k in str(c).lower() for k in ["review", "text", "comment", "desc", "feedback", "body"])
@@ -762,7 +667,6 @@ with tab_bulk:
 
         pipeline = load_sentiment_pipeline()
 
-        # Run vectorized batch inference
         with st.spinner(f"Running vectorized inference across {len(df_to_audit):,} reviews..."):
             cleaned_batch = df_to_audit[chosen_col].astype(str).apply(clean_text_for_inference)
             preds = pipeline.predict(cleaned_batch)
@@ -815,7 +719,6 @@ with tab_bulk:
 
         st.dataframe(display_df, use_container_width=True, hide_index=True)
 
-        # Download Processed Results
         csv_buffer = io.StringIO()
         df_to_audit.to_csv(csv_buffer, index=False)
         st.download_button(
@@ -827,12 +730,12 @@ with tab_bulk:
 
 
 # ==============================================================================
-# TAB 4: Smart Product Recommender (Quality & Rating Weighted)
+# VIEW 4: Smart Product Recommender (Quality & Rating Weighted)
 # ==============================================================================
-with tab_recommender:
+elif nav_selection == "🎯 Smart Product Recommender":
     st.subheader("Content-Based Smart Product Recommender")
     st.write(
-        "Find contextually relevant products using sparse TF-IDF and NearestNeighbors cosine embeddings. "
+        "Find contextually relevant products. "
         "Enhanced with **Smart Business Ranking** to elevate highly-rated items over defective products."
     )
 
@@ -875,7 +778,6 @@ with tab_recommender:
             placeholder="e.g. 'Refrigerator Water Filter', 'Subscription Beauty Box', 'Stainless Steel Blender'...",
         )
 
-    # Suggestion 2 Controls: Ranking Strategy & Quality Filter
     col_opt1, col_opt2, col_opt3 = st.columns([1.5, 1.2, 1.2])
 
     with col_opt1:
@@ -908,21 +810,16 @@ with tab_recommender:
             target_idx = asin_to_idx[query_str.upper()]
             target_row = catalog_df.iloc[target_idx]
 
-            st.markdown(
-                f"""
-                <div class="kpi-card" style="margin-bottom: 1.2rem;">
-                    <strong>Baseline Selected Product:</strong> {target_row['product_title']}<br>
-                    <strong>Category:</strong> {target_row['category']} | 
-                    <strong>Price:</strong> ${target_row['price']:.2f} | 
-                    <strong>Rating:</strong> ⭐ {target_row['avg_rating']} ({target_row['review_count']} reviews) | 
-                    <strong>ASIN:</strong> <code>{target_row['parent_asin']}</code>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            with st.container(border=True):
+                st.markdown(f"**Selected Product:** {target_row['product_title']}")
+                st.caption(
+                    f"Category: **{target_row['category']}** | "
+                    f"Price: **${target_row['price']:.2f}** | "
+                    f"Rating: **⭐ {target_row['avg_rating']}** ({target_row['review_count']} reviews) | "
+                    f"ASIN: `{target_row['parent_asin']}`"
+                )
 
             item_vec = nn_model._fit_X[target_idx]
-            # Fetch a larger pool so filtering and smart re-ranking have candidates
             distances, indices = nn_model.kneighbors(item_vec, n_neighbors=min(len(catalog_df), top_n * 6 + 1))
             raw_candidates = [(dist, idx) for dist, idx in zip(distances[0], indices[0]) if idx != target_idx]
 
@@ -941,18 +838,14 @@ with tab_recommender:
             avg_r = float(row["avg_rating"])
             r_count = int(row["review_count"])
 
-            # Apply user's minimum star rating filter
             if avg_r < min_rating_filter:
                 continue
 
             sim_score = max(0.0, 1.0 - float(dist))
 
             if "Smart Business" in ranking_strategy:
-                # Quality score normalized to [0, 1]
                 quality_score = avg_r / 5.0
-                # Popularity score using logarithmic scaling capped at 100 reviews
                 pop_score = min(1.0, math.log1p(r_count) / math.log1p(100))
-                # Composite formula: 65% Similarity + 25% Star Rating + 10% Review Volume
                 composite_score = (0.65 * sim_score) + (0.25 * quality_score) + (0.10 * pop_score)
             else:
                 composite_score = sim_score
@@ -963,48 +856,38 @@ with tab_recommender:
                 "row": row,
             })
 
-        # Sort by final score
         scored_results.sort(key=lambda x: x["composite_score"], reverse=True)
         final_picks = scored_results[:top_n]
 
         if final_picks:
             st.markdown(f"#### **Recommended Products ({len(final_picks)} Matches)**")
 
-            for item in final_picks:
+            for rank_i, item in enumerate(final_picks, start=1):
                 row = item["row"]
                 sim = item["similarity_score"] * 100
                 comp = item["composite_score"] * 100
                 r_val = float(row["avg_rating"])
                 r_num = int(row["review_count"])
                 price = float(row["price"])
+                is_top_rated = r_val >= 4.5 and r_num >= 5
 
-                top_rated_badge = '<span class="badge-toprated">⭐ Top Rated</span>' if r_val >= 4.5 and r_num >= 5 else ""
+                with st.container(border=True):
+                    col_h_left, col_h_right = st.columns([4, 1.2])
+                    with col_h_left:
+                        top_rated_text = " [⭐ Top Rated Product]" if is_top_rated else ""
+                        st.markdown(f"**#{rank_i}. {row['product_title']}**{top_rated_text}")
+                        st.caption(f"Category: {row['category']}  •  ASIN: `{row['parent_asin']}`")
+                    with col_h_right:
+                        st.markdown(f"### ${price:.2f}")
 
-                st.markdown(
-                    f"""
-                    <div class="product-card">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div style="font-weight: 700; font-size: 1.05rem; color: #0F172A; margin-bottom: 0.35rem;">
-                                {row['product_title']}
-                            </div>
-                            <div style="text-align: right; min-width: 120px;">
-                                <span class="price-pill">${price:.2f}</span>
-                            </div>
-                        </div>
-                        <div style="font-size: 0.85rem; color: #64748B; margin-bottom: 0.5rem;">
-                            Category: <strong>{row['category']}</strong> | ASIN: <code>{row['parent_asin']}</code>
-                        </div>
-                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                            <span class="rating-pill">⭐ {r_val:.1f} ({r_num:,} reviews)</span>
-                            {top_rated_badge}
-                            <span class="match-pill">Similarity: {sim:.1f}%</span>
-                            <span style="background-color: #F8FAFC; color: #475569; font-size: 0.8rem; font-weight: 600; padding: 3px 8px; border-radius: 6px; border: 1px solid #E2E8F0;">
-                                Composite Score: {comp:.1f}%
-                            </span>
-                        </div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+                    col_s1, col_s2, col_s3, col_s4 = st.columns(4)
+                    with col_s1:
+                        st.markdown(f"**Customer Rating:**  \n⭐ {r_val:.1f} / 5.0")
+                    with col_s2:
+                        st.markdown(f"**Review Volume:**  \n{r_num:,} customer reviews")
+                    with col_s3:
+                        st.markdown(f"**Similarity Match:**  \n{sim:.1f}%")
+                    with col_s4:
+                        st.markdown(f"**Composite Score:**  \n{comp:.1f}%")
         else:
             st.warning(f"No products found meeting the minimum rating threshold of {min_rating_filter}★. Try lowering the rating slider.")
