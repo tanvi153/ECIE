@@ -21,6 +21,8 @@ from typing import Dict, List, Optional, Tuple
 import joblib
 import numpy as np
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 
 # ==============================================================================
@@ -35,6 +37,7 @@ if str(PROJECT_ROOT) not in sys.path:
 SENTIMENT_MODEL_PATH = PROJECT_ROOT / "models" / "sentiment_pipeline.joblib"
 RECOMMENDER_MODEL_PATH = PROJECT_ROOT / "models" / "recommender.joblib"
 PRODUCTS_CSV_PATH = PROJECT_ROOT / "data" / "products_sample.csv"
+POWERBI_MASTER_CSV_PATH = PROJECT_ROOT / "data" / "powerbi" / "master_unified_report.csv"
 
 # ==============================================================================
 # Contraction Rules for Inference Preprocessing
@@ -108,6 +111,14 @@ def load_catalog_data():
     df["avg_rating"] = pd.to_numeric(df["avg_rating"], errors="coerce").fillna(4.0).round(2)
     df["review_count"] = pd.to_numeric(df["review_count"], errors="coerce").fillna(1).astype(int)
     return df
+
+
+@st.cache_data(show_spinner="Loading Power BI master dataset...")
+def load_powerbi_master_data() -> pd.DataFrame:
+    """Loads the pre-aggregated Power BI master analytical dataset."""
+    if not POWERBI_MASTER_CSV_PATH.exists():
+        return pd.DataFrame()
+    return pd.read_csv(POWERBI_MASTER_CSV_PATH)
 
 
 # ==============================================================================
@@ -447,48 +458,233 @@ if nav_selection == "📊 Platform Overview":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Analytics Charts
-    col_ch1, col_ch2 = st.columns(2)
+    # 4 Multi-Page Analytical Views (Exact Power BI Mirror)
+    pbi_tab1, pbi_tab2, pbi_tab3, pbi_tab4 = st.tabs([
+        "🏬 Page 1: Category & Store Sentiment",
+        "📈 Page 2: Temporal Rating Trends (2012–2023)",
+        "💰 Page 3: Price vs Rating Elasticity",
+        "⚙️ Page 4: System Architecture & Warehouse Health",
+    ])
 
-    with col_ch1:
-        st.markdown("#### **Customer Rating Distribution (3.1M Reviews)**")
-        rating_dist = pd.DataFrame({
-            "Star Rating": ["5 Stars ★★★★★", "1 Star ★☆☆☆☆", "2 Stars ★★☆☆☆", "4 Stars ★★★★☆"],
-            "Review Count": [1277750, 1016457, 533543, 272250],
-            "Share (%)": [41.2, 32.8, 17.2, 8.8],
-        }).set_index("Star Rating")
-        st.bar_chart(rating_dist["Review Count"], color="#2563EB")
-        st.caption("Distribution across the complete 3,100,000 Amazon Customer Review dataset.")
+    df_pbi = load_powerbi_master_data()
 
-    with col_ch2:
-        st.markdown("#### **Sentiment Polarity Balance (500k Benchmark)**")
-        polarity_dist = pd.DataFrame({
-            "Polarity": ["Positive Sentiment (4-5★)", "Negative Sentiment (1-2★)"],
-            "Evaluated Reviews": [250000, 250000],
-        }).set_index("Polarity")
-        st.bar_chart(polarity_dist["Evaluated Reviews"], color="#059669")
-        st.caption("Stratified 50/50 balanced training & testing partition (400,000 train / 100,000 test).")
+    # --------------------------------------------------------------------------
+    # TAB 1: Category & Store Sentiment
+    # --------------------------------------------------------------------------
+    with pbi_tab1:
+        st.markdown("### **Category & Merchant Store Sentiment Intelligence**")
+        st.caption("Interactive cross-filtering of sentiment distribution across product categories and top merchant storefronts.")
 
-    st.markdown("---")
+        if not df_pbi.empty:
+            col_filter1, col_filter2 = st.columns([2, 2])
+            with col_filter1:
+                cat_options = ["All Categories"] + sorted(df_pbi["category"].dropna().unique().tolist())
+                selected_cat = st.selectbox("Filter by Category:", cat_options, key="pbi_cat_filter")
+            with col_filter2:
+                sentiment_filter = st.radio("Sentiment Polarity:", ["All Sentiments", "Positive", "Negative"], horizontal=True, key="pbi_sent_filter")
 
-    col_cat1, col_cat2 = st.columns(2)
+            # Filter data
+            dff1 = df_pbi.copy()
+            if selected_cat != "All Categories":
+                dff1 = dff1[dff1["category"] == selected_cat]
+            if sentiment_filter == "Positive":
+                dff1 = dff1[dff1["sentiment"] == "positive"]
+            elif sentiment_filter == "Negative":
+                dff1 = dff1[dff1["sentiment"] == "negative"]
 
-    with col_cat1:
-        st.markdown("#### **Top Product Catalog Categories**")
-        catalog_sample = load_catalog_data()
-        top_cats = catalog_sample["category"].value_counts().head(7).reset_index()
-        top_cats.columns = ["Category", "Product Count"]
-        st.dataframe(top_cats, hide_index=True, use_container_width=True)
+            # Visual 1 & 2 in two columns
+            c_v1, c_v2 = st.columns(2)
 
-    with col_cat2:
-        st.markdown("#### **Product Price Bracket Distribution**")
-        price_bins = pd.cut(
-            catalog_sample["price"],
-            bins=[0, 20, 50, 100, 10000],
-            labels=["Budget (<$20)", "Mid-Tier ($20-$50)", "Upper Mid ($50-$100)", "Premium ($100+)"],
-        ).value_counts().reset_index()
-        price_bins.columns = ["Price Bracket", "Catalog Products"]
-        st.bar_chart(price_bins.set_index("Price Bracket")["Catalog Products"], color="#D97706")
+            with c_v1:
+                st.markdown("##### **Category Sentiment Share (100% Normalized)**")
+                cat_summary = df_pbi.groupby(["category", "sentiment"])["review_count"].sum().reset_index()
+                fig_cat = px.histogram(
+                    cat_summary,
+                    y="category",
+                    x="review_count",
+                    color="sentiment",
+                    barnorm="percent",
+                    orientation="h",
+                    color_discrete_map={"positive": "#10B981", "negative": "#EF4444"},
+                    labels={"review_count": "Sentiment Ratio (%)", "category": "Product Category"},
+                )
+                fig_cat.update_layout(
+                    barmode="stack",
+                    margin=dict(l=20, r=20, t=30, b=20),
+                    height=350,
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                )
+                st.plotly_chart(fig_cat, use_container_width=True)
+
+            with c_v2:
+                st.markdown("##### **Top Merchant Stores by Review Volume**")
+                store_summary = dff1[dff1["store_name"] != "Other Verified Stores"].groupby(["store_name", "sentiment"])["review_count"].sum().reset_index()
+                top_stores = store_summary.groupby("store_name")["review_count"].sum().nlargest(8).index
+                store_summary = store_summary[store_summary["store_name"].isin(top_stores)]
+
+                fig_store = px.bar(
+                    store_summary,
+                    y="store_name",
+                    x="review_count",
+                    color="sentiment",
+                    barmode="group",
+                    orientation="h",
+                    color_discrete_map={"positive": "#10B981", "negative": "#EF4444"},
+                    labels={"review_count": "Total Reviews", "store_name": "Merchant Store"},
+                )
+                fig_store.update_layout(
+                    margin=dict(l=20, r=20, t=30, b=20),
+                    height=350,
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                )
+                st.plotly_chart(fig_store, use_container_width=True)
+
+            # Store Benchmark Table
+            st.markdown("##### **Merchant Store Performance Scorecard**")
+            store_table = dff1.groupby("store_name").agg(
+                total_reviews=("review_count", "sum"),
+                avg_rating=("avg_rating", "mean"),
+                verified_reviews=("verified_reviews", "sum"),
+            ).reset_index()
+            store_table["verified_rate"] = (store_table["verified_reviews"] / store_table["total_reviews"] * 100).round(1).astype(str) + "%"
+            store_table["avg_rating"] = store_table["avg_rating"].round(2)
+            store_table = store_table.sort_values(by="total_reviews", ascending=False).head(10)
+            store_table.columns = ["Merchant Store", "Total Reviews", "Average Rating (★)", "Verified Reviews", "Verified Purchase %"]
+            st.dataframe(store_table, hide_index=True, use_container_width=True)
+        else:
+            st.warning("Master dataset not found. Please run `scripts/export_powerbi.py`.")
+
+    # --------------------------------------------------------------------------
+    # TAB 2: Temporal Rating Trends (2012-2023)
+    # --------------------------------------------------------------------------
+    with pbi_tab2:
+        st.markdown("### **Temporal Rating Trends & Sentiment Velocity**")
+        st.caption("Longitudinal analysis of consumer rating trajectories and review growth velocity over 11 years (2012–2023).")
+
+        if not df_pbi.empty:
+            year_range = st.slider("Select Year Timeline Range:", min_value=2012, max_value=2023, value=(2014, 2023), key="pbi_year_slider")
+            dff2 = df_pbi[(df_pbi["review_year"] >= year_range[0]) & (df_pbi["review_year"] <= year_range[1])]
+
+            c_t1, c_t2 = st.columns(2)
+
+            with c_t1:
+                st.markdown("##### **Longitudinal Rating Evolution (Trend Line)**")
+                yearly_ratings = dff2.groupby(["review_year", "category"])["avg_rating"].mean().reset_index()
+                fig_trend = px.line(
+                    yearly_ratings,
+                    x="review_year",
+                    y="avg_rating",
+                    color="category",
+                    markers=True,
+                    labels={"review_year": "Review Year", "avg_rating": "Average Rating (1-5★)"},
+                )
+                fig_trend.update_layout(
+                    yaxis=dict(range=[2.5, 5.0]),
+                    margin=dict(l=20, r=20, t=30, b=20),
+                    height=360,
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                )
+                st.plotly_chart(fig_trend, use_container_width=True)
+
+            with c_t2:
+                st.markdown("##### **Annual Review Volume Velocity by Sentiment**")
+                yearly_vol = dff2.groupby(["review_year", "sentiment"])["review_count"].sum().reset_index()
+                fig_area = px.area(
+                    yearly_vol,
+                    x="review_year",
+                    y="review_count",
+                    color="sentiment",
+                    color_discrete_map={"positive": "#10B981", "negative": "#EF4444"},
+                    labels={"review_year": "Review Year", "review_count": "Annual Review Volume"},
+                )
+                fig_area.update_layout(
+                    margin=dict(l=20, r=20, t=30, b=20),
+                    height=360,
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                )
+                st.plotly_chart(fig_area, use_container_width=True)
+
+    # --------------------------------------------------------------------------
+    # TAB 3: Price vs Rating Relationships
+    # --------------------------------------------------------------------------
+    with pbi_tab3:
+        st.markdown("### **Price vs. Rating Relationships (Catalog Quality & Elasticity)**")
+        st.caption("Investigates pricing tiers against customer satisfaction scores, replacing transactional GMV with catalog elasticity analytics.")
+
+        if not df_pbi.empty:
+            c_p1, c_p2 = st.columns(2)
+
+            with c_p1:
+                st.markdown("##### **Customer Satisfaction by Price Tier**")
+                tier_summary = df_pbi.groupby("price_tier").agg(
+                    total_reviews=("review_count", "sum"),
+                    avg_rating=("avg_rating", "mean"),
+                    avg_price=("avg_price", "mean"),
+                ).reset_index()
+                fig_tier = px.bar(
+                    tier_summary,
+                    x="price_tier",
+                    y="avg_rating",
+                    color="price_tier",
+                    text_auto=".2f",
+                    labels={"price_tier": "Catalog Price Bracket", "avg_rating": "Average Rating (1-5★)"},
+                )
+                fig_tier.update_layout(
+                    yaxis=dict(range=[2.5, 5.0]),
+                    margin=dict(l=20, r=20, t=30, b=20),
+                    height=360,
+                    showlegend=False,
+                )
+                st.plotly_chart(fig_tier, use_container_width=True)
+
+            with c_p2:
+                st.markdown("##### **Price vs. Rating Scatter Plot (Bubble Size = Review Volume)**")
+                scatter_data = df_pbi[df_pbi["store_name"] != "Other Verified Stores"].groupby(["store_name", "category", "price_tier"]).agg(
+                    avg_price=("avg_price", "mean"),
+                    avg_rating=("avg_rating", "mean"),
+                    review_count=("review_count", "sum"),
+                ).reset_index()
+
+                fig_scatter = px.scatter(
+                    scatter_data,
+                    x="avg_price",
+                    y="avg_rating",
+                    size="review_count",
+                    color="category",
+                    hover_name="store_name",
+                    labels={"avg_price": "Average Product Price ($)", "avg_rating": "Average Rating (1-5★)"},
+                )
+                fig_scatter.update_layout(
+                    margin=dict(l=20, r=20, t=30, b=20),
+                    height=360,
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                )
+                st.plotly_chart(fig_scatter, use_container_width=True)
+
+    # --------------------------------------------------------------------------
+    # TAB 4: System Architecture & Ingestion Health
+    # --------------------------------------------------------------------------
+    with pbi_tab4:
+        st.markdown("### **Underlying Database Architecture & Partitioning**")
+        col_ch1, col_ch2 = st.columns(2)
+        with col_ch1:
+            st.markdown("##### **Customer Rating Distribution (3.1M Reviews)**")
+            rating_dist = pd.DataFrame({
+                "Star Rating": ["5 Stars ★★★★★", "1 Star ★☆☆☆☆", "2 Stars ★★☆☆☆", "4 Stars ★★★★☆"],
+                "Review Count": [1277750, 1016457, 533543, 272250],
+                "Share (%)": [41.2, 32.8, 17.2, 8.8],
+            }).set_index("Star Rating")
+            st.bar_chart(rating_dist["Review Count"], color="#2563EB")
+            st.caption("Distribution across the complete 3,100,000 Amazon Customer Review dataset.")
+
+        with col_ch2:
+            st.markdown("##### **Sentiment Polarity Balance (500k Benchmark)**")
+            polarity_dist = pd.DataFrame({
+                "Polarity": ["Positive Sentiment (4-5★)", "Negative Sentiment (1-2★)"],
+                "Evaluated Reviews": [250000, 250000],
+            }).set_index("Polarity")
+            st.bar_chart(polarity_dist["Evaluated Reviews"], color="#059669")
+            st.caption("Stratified 50/50 balanced training & testing partition (400,000 train / 100,000 test).")
 
 
 # ==============================================================================
