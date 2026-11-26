@@ -44,6 +44,8 @@ data/processed/*.parquet
 !data/products_sample.csv
 !data/powerbi/*.csv
 !data/powerbi/*.tsv
+!data/seller_catalog_performance.csv
+!data/seller_sample_feedback.json
 
 # ==============================================================================
 # Runtime Logs & Temp Files
