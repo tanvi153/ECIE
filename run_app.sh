@@ -11,7 +11,7 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$PROJECT_DIR"
 
 echo "============================================================"
-echo "🚀 Starting E-Commerce Seller Intelligence Engine (E-CIE)..."
+echo "🚀 Starting E-Commerce Intelligence Engine (E-CIE)..."
 echo "============================================================"
 
 # 1. Check or set up a clean host virtual environment

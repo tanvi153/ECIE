@@ -389,8 +389,8 @@ st.markdown(
     """
     <div class="brand-container">
         <div>
-            <h1 class="brand-title">E-Commerce Seller Intelligence Engine (E-CIE)</h1>
-            <div class="brand-sub">AI-Powered Merchant Cockpit: Extract Customer Insights, Diagnose Dissatisfaction & Scale Business</div>
+            <h1 class="brand-title">E-Commerce Intelligence Engine (E-CIE)</h1>
+            <div class="brand-sub">Autonomous Customer Feedback Mining, Sentiment Diagnostics & Smart Product Recommendations</div>
         </div>
     </div>
     """,
@@ -401,7 +401,24 @@ st.markdown(
 # Sidebar - E-CIE Navigation
 # ==============================================================================
 with st.sidebar:
-    st.image("https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/Python-Dark.svg", width=42)
+    st.markdown(
+        """
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 0.75rem;">
+            <div style="background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+            </div>
+            <div>
+                <div style="font-size: 1.15rem; font-weight: 700; color: #0F172A; line-height: 1.2;">E-CIE Platform</div>
+                <div style="font-size: 0.75rem; font-weight: 500; color: #64748B;">Intelligence Engine</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     st.markdown("### **E-CIE Navigation**")
     st.caption("Minor Project | E-Commerce Intelligence Engine")
 
@@ -409,7 +426,7 @@ with st.sidebar:
     nav_selection = st.radio(
         "Navigation Menu:",
         [
-            "📊 Seller Business Overview",
+            "📊 Business Overview",
             "📝 Review Intelligence & XAI",
             "📁 Bulk Review Auditor",
             "🎯 Smart Product Recommender",
@@ -418,7 +435,7 @@ with st.sidebar:
     )
 
     st.markdown("---")
-    st.markdown("##### **🏪 Merchant / Seller Login**")
+    st.markdown("##### **🏪 Merchant / Storefront Login**")
     seller_store_names = [
         "Anker Direct",
         "Sony Official",
@@ -434,7 +451,7 @@ with st.sidebar:
         "Active Storefront Account:",
         seller_store_names,
         index=0,
-        help="Select a seller brand to customize analytics, customer feedback, and product diagnostics for that business.",
+        help="Select a store brand to customize analytics, customer feedback, and product diagnostics for that business.",
     )
     if selected_seller != "All Marketplace (Global Overview)":
         st.success(f"🟢 **Store**: **{selected_seller}**")
@@ -443,9 +460,9 @@ with st.sidebar:
 
 
 # ==============================================================================
-# VIEW 1: Seller Business Overview & Growth Dashboard
+# VIEW 1: Business Overview & Growth Dashboard
 # ==============================================================================
-if nav_selection == "📊 Seller Business Overview":
+if nav_selection == "📊 Business Overview":
     df_seller_perf = load_seller_catalog_performance()
     seller_feedback = load_seller_sample_feedback()
     df_pbi = load_powerbi_master_data()
