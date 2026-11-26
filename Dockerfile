@@ -15,11 +15,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application, modular source code, trained models, and sample catalog
+# Copy application, modular source code, trained models, and data
 COPY src/ ./src/
 COPY app/ ./app/
 COPY models/ ./models/
-COPY data/products_sample.csv ./data/products_sample.csv
+COPY data/ ./data/
 
 # Expose Streamlit default port
 EXPOSE 8501

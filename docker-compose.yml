@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    container_name: ecie-web-app
+    ports:
+      - "8501:8501"
+    environment:
+      - POSTGRES_HOST=host.docker.internal
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=ecie_project_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=tanvipostgres
+    restart: unless-stopped

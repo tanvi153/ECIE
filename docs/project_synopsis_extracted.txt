@@ -1,0 +1,487 @@
+Project Synopsis
+
+On
+
+Minor Project-I
+
+Enterprise E-Commerce Intelligence Engine (E-CIE)
+
+Submitted in partial fulfillment
+
+for the award of the degree of
+
+Bachelor of Technology
+
+in
+
+Computer Science Engineering
+
+(Artificial Intelligence & Machine Learning)
+
+Submitted By
+
+Tanvi28240543
+
+Krish Malhotra28240539
+
+Under the Supervision of
+
+Ms. Diksha
+
+Assistant Professor, CSE (AI&ML)
+
+Panipat Institute of Engineering & Technology,
+
+Samalkha, Panipat
+
+Affiliated to
+
+Kurukshetra University Kurukshetra, India
+
+(2025–2026)
+
+Project Credentials
+
+Project title
+
+Enterprise E-Commerce Intelligence Engine (E-CIE)
+
+Project Domain/Area
+
+Data Analytics, Business Intelligence & Machine Learning
+
+Group members
+
+1. Tanvi  28240543
+
+2. Krish Malhotra  28240539
+
+Group Id
+
+(to be allotted by project coordinator)
+
+Supervisor's Name
+
+Ms. Diksha
+
+Supervisor's Designation
+
+Assistant Professor, CSE(AI&ML)
+
+Supervisor's Consent
+
+The synopsis of final year project work titled “Enterprise E-Commerce Intelligence Engine (E-CIE)” by the students’ group id ......... has been written with my consent and every section of this synopsis report is reflecting the work to be carried out by the group.
+
+(Signature of supervisor with date)
+
+Department Project Evaluation Committee (DPEC) Remarks
+
+The project is ……………………….. by DPEC. The group is advised to submit progress of the project work in progress presentation-1 to be held on…………………………………………….
+
+OR
+
+The project is ……………………….. by DPEC. The group is advised to submit the synopsis report again after making changes as suggested by DPEC on …………………........................................
+
+Name & Signature of DPEC member (s) with date
+
+Enterprise E-Commerce Intelligence Engine (E-CIE)
+
+1. Introduction
+
+Multi-vendor e-commerce marketplaces generate enormous volumes of customer feedback, product metadata, and seller information every day, yet this information typically resides in disconnected silos that make real-time, end-to-end analysis difficult. As a result, brand managers and operations teams are often reactive rather than proactive: product flaws and declining customer sentiment are usually noticed only after ratings drop, while shoppers struggle to discover relevant products among millions of listings because feedback signals are rarely connected to discovery and recommendation systems.
+
+The Enterprise E-Commerce Intelligence Engine (E-CIE) addresses this gap by unifying the analytics lifecycle for a large, multi-category e-commerce feedback dataset. Approximately 2–3 million real customer reviews and their associated product, store, and user metadata — drawn from the Amazon Reviews 2023 corpus (McAuley Lab) across the Cell Phones & Accessories, Electronics, Video Games, and Tools & Home Improvement categories — are restructured into a clean, relational PostgreSQL warehouse. Unstructured review text is mined using Natural Language Processing (NLP) to classify customer sentiment, while product metadata powers a content-based recommendation engine. The resulting insights are served through an interactive Streamlit web application and executive Power BI dashboards. The platform is intended for e-commerce brand managers, category analysts, and platform teams who need to understand how customers feel about products and help shoppers discover items they are likely to want.
+
+2. Objective
+
+The primary objective of this project is to design and implement an enterprise-grade data intelligence platform that transforms roughly 2–3 million raw Amazon review and product records (sampled from four product categories) into a normalized, five-table relational data warehouse, and to train two complementary machine learning models: (a) a text-based customer sentiment classifier, and (b) a content-based product recommendation engine.
+
+The secondary objective is to expose these insights through two complementary interfaces: a live Streamlit web application that lets business users test review sentiment in real time and explore “similar product” recommendations, and a multi-page Power BI executive dashboard that tracks review-driven KPIs such as rating trends, sentiment distribution by category/store, and price-to-rating relationships. A further objective is to package the entire solution using Docker and automate testing and deployment through a GitHub Actions CI/CD pipeline, so that the system is reproducible and cloud-deployable.
+
+3. Scope
+
+The scope of this project covers the following areas:
+
+Data Sourcing & Sampling: Streaming and reservoir-sampling ~2–3 million reviews (and their linked product metadata) from four Amazon Reviews 2023 categories, avoiding the need to download the full multi-gigabyte source files.
+
+Data Warehousing: Restructuring the sampled data into 5 relational tables — reviews, review_text, products, stores, and users — in PostgreSQL, with enforced primary/foreign keys and star-schema analytical views.
+
+Data Cleaning & Feature Engineering: Connecting Python (via SQLAlchemy) to PostgreSQL to handle nulls (e.g., missing price/main_category), parse timestamps, and vectorize review and product text using TF-IDF.
+
+NLP-based Sentiment Analysis: Classifying customer reviews as positive, negative, or neutral directly from review text, independent of the numeric rating (to avoid label leakage).
+
+Content-Based Product Recommendation: Recommending similar products from product titles, categories, and metadata using TF-IDF and nearest-neighbour similarity, addressing the extreme sparsity of user-product interactions in the dataset.
+
+Experiment Tracking: Logging model metrics and parameters with MLflow, and serializing trained models with Joblib.
+
+Business Intelligence Dashboarding: A multi-page Power BI report connected directly to PostgreSQL, covering rating trends, sentiment-by-category, and store-level performance.
+
+Live Web Application: A Streamlit-based dashboard for real-time review sentiment testing and product recommendation browsing.
+
+DevOps & Deployment: Containerizing the backend and frontend with Docker and automating tests and deployment through GitHub Actions CI/CD to cloud hosting.
+
+4. Architecture
+
+The system is organized into five layers, summarized below:
+
+Layer
+
+Technologies Used
+
+Exact Role in Project
+
+Database & Storage
+
+PostgreSQL, pgAdmin 4, SQL, PL/pgSQL
+
+Relational data warehouse (5 tables), constraint enforcement, and aggregated analytical views.
+
+Data Processing
+
+Python, Pandas, NumPy, SQLAlchemy, Psycopg2, Requests
+
+Streaming/reservoir sampling of source data, database connection, missing-value handling, and data wrangling.
+
+Machine Learning & NLP
+
+Scikit-Learn (TF-IDF, SGDClassifier/Linear SVM, NearestNeighbors)
+
+Text vectorization, sentiment classification, and content-based similarity search for recommendations.
+
+Experiment Tracking
+
+MLflow, Joblib
+
+Model metric logging (Accuracy, F1, Precision/Recall), parameter tracking, and model serialization.
+
+Business Intelligence
+
+Power BI/Tableau, DAX, Power Query
+
+Rating-trend and sentiment-driven KPI cards and executive dashboards.
+
+Frontend UI & API
+
+Streamlit, FastAPI
+
+Interactive web app for testing live review sentiment and browsing product recommendations.
+
+DevOps & Deployment
+
+Docker, Git, GitHub Actions, Streamlit Cloud
+
+Multi-stage containerization, CI/CD automated test pipelines, and free cloud deployment.
+
+5. Methodology
+
+This project follows an end-to-end analytics engineering pipeline, from raw data sourcing to live business-facing insight.
+
+5.1 Data Sourcing, Sampling & Warehouse
+
+Stream each target category's raw review and metadata files directly from the Amazon Reviews 2023 (McAuley Lab) repository, without downloading the full multi-gigabyte source files.
+
+Apply reservoir sampling to draw a uniformly random ~2–3 million review subset across the four categories, then retrieve only the matching product metadata.
+
+Restructure the sampled data into 5 relational tables (reviews, review_text, products, stores, users) and load them into PostgreSQL via pgAdmin 4, enforcing primary/foreign keys and building star-schema analytical views.
+
+5.2 Data Cleaning & Feature Engineering
+
+Connect Python (SQLAlchemy) to PostgreSQL; handle nulls in price and main_category, and parse Unix timestamps into readable dates.
+
+Vectorize review_text/review_title (for sentiment) and product_title/category/main_category (for recommendation) separately using TF-IDF with unigrams and bigrams.
+
+5.3 Machine Learning Core
+
+Model 1 (Sentiment Analysis): TF-IDF (1–2 gram) features from review text and title, trained with a linear Support Vector Machine (via SGDClassifier for scalability to millions of rows) to classify reviews as positive, negative, or neutral — using only text features to avoid leaking the numeric rating into the model.
+
+Model 2 (Content-Based Recommendation): TF-IDF vectors built from product title, category, and main_category, with a Nearest-Neighbours (cosine similarity) index used to retrieve the top-N most similar products for any given item, avoiding the need to compute a full pairwise similarity matrix.
+
+Persist trained models with Joblib and track experiments (accuracy, F1, precision/recall) with MLflow.
+
+5.4 Analytics, Visualization & BI
+
+Power BI: Connect directly to PostgreSQL and build a multi-page interactive report covering rating trends over time, sentiment distribution by category and store, and price-versus-rating relationships (in place of order-level GMV/AOV metrics, since the dataset contains review and listing data rather than transaction records).
+
+Streamlit: Provide a user-facing live web dashboard where a manager can paste review text to test sentiment, or select a product to see its top recommended alternatives.
+
+5.5 DevOps & Deployment
+
+Package backend and frontend into Docker containers.
+
+Automate tests with GitHub Actions CI/CD and deploy live to cloud hosting.
+
+6. Primary Dataset
+
+The project uses the Amazon Reviews 2023 dataset published by the McAuley Lab (UC San Diego), one of the largest publicly available e-commerce review corpora, spanning 33 product categories with hundreds of millions of reviews and tens of millions of products. Rather than using the dataset in full, a curated subset of approximately 2–3 million reviews was drawn from four categories — Cell_Phones_and_Accessories, Electronics, Video_Games, and Tools_and_Home_Improvement — using streaming and reservoir sampling, then restructured into five clean relational tables. The exact schema, verified from the project's own data-preparation notebook, is summarized below.
+
+6.1 Table: reviews  (3,100,000 rows, 9 columns)
+
+Column
+
+Description
+
+review_id
+
+Unique identifier for each review (primary key)
+
+parent_asin
+
+Product identifier the review belongs to (foreign key → products.parent_asin)
+
+user_id
+
+Identifier of the reviewer (foreign key → users.user_id)
+
+rating
+
+Star rating given by the customer (1–5)
+
+sentiment
+
+Pre-derived sentiment label (positive / negative / neutral) used as the ground-truth target for Model 1
+
+timestamp
+
+Unix timestamp of when the review was posted
+
+helpful_vote
+
+Number of users who marked the review as helpful
+
+verified_purchase
+
+Boolean flag indicating a verified purchase
+
+category
+
+Product category the review falls under
+
+6.2 Table: review_text  (3,100,000 rows, 3 columns)
+
+Column
+
+Description
+
+review_id
+
+Links back to reviews.review_id (primary/foreign key)
+
+review_title
+
+Short headline of the review, written by the customer
+
+review_text
+
+Full free-text body of the review — the core input for the sentiment model
+
+6.3 Table: products  (857,376 rows, 6 columns)
+
+Column
+
+Description
+
+parent_asin
+
+Unique product identifier (primary key)
+
+product_title
+
+Full product name/listing title — a key input for the recommendation model
+
+category
+
+Sub-category the product belongs to
+
+main_category
+
+Broader Amazon storefront category
+
+price
+
+Listed product price (contains some missing values)
+
+store_id
+
+Identifier of the selling store (foreign key → stores.store_id)
+
+6.4 Table: stores  (133,495 rows, 2 columns)
+
+Column
+
+Description
+
+store_id
+
+Unique store/brand identifier (primary key)
+
+store_name
+
+Display name of the store or brand
+
+6.5 Table: users  (868,984 rows, 6 columns)
+
+Column
+
+Description
+
+user_id
+
+Unique reviewer identifier (primary key)
+
+total_reviews
+
+Total number of reviews written by the user (frequency signal)
+
+avg_rating_given
+
+Average star rating the user tends to give
+
+total_helpful_votes
+
+Total helpful votes accumulated across the user's reviews
+
+first_review_timestamp
+
+Timestamp of the user's earliest review in the dataset
+
+last_review_timestamp
+
+Timestamp of the user's most recent review (recency signal)
+
+Relationally, reviews.parent_asin links to products.parent_asin, products.store_id links to stores.store_id, reviews.user_id links to users.user_id, and reviews.review_id links one-to-one with review_text.review_id — forming a clean star-schema-like structure with reviews at the centre.
+
+7. Conclusion
+
+This project demonstrates an end-to-end, production-oriented integration of relational data engineering, natural language processing, and business intelligence into a single decision-support platform for e-commerce operations. The first major achievement is data engineering at scale: roughly 2–3 million reviews and their linked metadata were streamed and reservoir-sampled from a multi-hundred-million-row public corpus without ever downloading the source files in full, then normalized into five clean, foreign-key-linked relational tables inside PostgreSQL — a workflow that mirrors how real analytics teams curate manageable, high-quality subsets from massive raw data lakes.
+
+The second achievement is a pair of complementary, purpose-fit machine learning models rather than one-size-fits-all algorithms. The sentiment classifier was deliberately built on TF-IDF text features alone — excluding the numeric rating — so that it genuinely learns language patterns instead of trivially echoing a label derived from that same rating. The recommendation engine was deliberately built as a content-based system rather than collaborative filtering, because exploratory analysis of the users table showed that the overwhelming majority of reviewers have only one or two recorded interactions; a similarity-based approach on product text sidesteps this sparsity and still produces meaningful “customers who liked this might also like” style suggestions without a cold-start penalty.
+
+The third achievement is turning both models into something a non-technical stakeholder can actually use: a live Streamlit application lets a manager paste a review and instantly see its sentiment, or pick a product and see its nearest textual neighbours, while a Power BI layer aggregates the same warehouse into rating-trend and sentiment-by-category views for executive reporting. Finally, wrapping the whole pipeline in Docker containers with a GitHub Actions CI/CD workflow ensures the system is not a one-off notebook exercise but a reproducible, version-controlled, and cloud-deployable artifact — closing the loop from raw, noisy customer feedback to a clean warehouse, to trained models, to an interface a business user can act on.
+
+7.1 Key Highlights (Core Deliverables at Completion)
+
+Curated Relational Dataset: ~2–3 million Amazon Reviews 2023 records restructured into 5 clean, foreign-key-linked PostgreSQL tables, built via a reproducible streaming/reservoir-sampling pipeline.
+
+Trained ML Models: Two production-ready .joblib models — a leakage-free Sentiment Classifier and a Content-Based Product Recommender — logged via MLflow.
+
+Executive BI Dashboard (Power BI): A multi-page business intelligence report tracking rating trends, sentiment drivers, and store-level performance.
+
+Live Web App (Streamlit): A deployed dashboard allowing anyone to test review sentiment and browse product recommendations in real time.
+
+Dockerized Codebase & CI/CD Pipeline: A clean GitHub repository featuring automated tests, a reproducible Docker container, and an architectural README.
+
+7.2 Limitations
+
+Sparse User Histories: Most users have only 1–2 recorded reviews, which limits collaborative filtering and was the direct reason a content-based recommendation approach was chosen instead.
+
+Rating-Derived Sentiment Label: The ground-truth sentiment label is itself derived from the star rating, so model evaluation must rely on held-out text-only performance rather than assuming independence from rating.
+
+Cold-Start Products: Newly listed products with sparse or missing metadata (e.g., missing price/main_category) may receive lower-quality recommendations.
+
+8. Future Scope
+
+Hybrid Recommendation: Combine the content-based engine with collaborative filtering (e.g., ALS) for the subset of users who do have sufficient review history, blending both signals.
+
+Graph-Based Recommendation: Explore Graph Neural Network models (e.g., LightGCN, NGCF via the RecBole library) to exploit the user–item interaction graph despite its sparsity.
+
+Transformer-Based Sentiment: Fine-tune a lightweight transformer (e.g., DistilBERT) on a sampled subset to benchmark against the TF-IDF + SVM baseline.
+
+Real-Time Ingestion: Introduce a streaming pipeline (e.g., Kafka) to replace batch loading with near real-time updates.
+
+Category Expansion: Extend the sampling and modeling pipeline to additional Amazon Reviews 2023 categories beyond the initial four.
+
+Transactional Data Integration: If order/transaction-level data becomes available, extend the BI layer to true GMV/AOV/RFM financial metrics.
+
+Hardware/Software Requirements
+
+Programming Language: Python, SQL, PL/pgSQL
+
+Database: PostgreSQL, pgAdmin 4
+
+Data Sourcing: Requests (streaming download), gzip/JSON parsing, reservoir sampling
+
+ML/NLP Libraries: Scikit-Learn (TfidfVectorizer, SGDClassifier, NearestNeighbors), Pandas, NumPy
+
+Experiment Tracking: MLflow, Joblib
+
+Business Intelligence: Power BI/Tableau, DAX, Power Query
+
+Frontend & API: Streamlit, FastAPI
+
+DevOps: Docker, Git, GitHub Actions, Streamlit Cloud
+
+Development Environment: VS Code / PyCharm / pgAdmin 4
+
+Hardware: Standard multi-core development machine (cloud-deployable; no specialized GPU required for the core models)
+
+References
+
+[1] Hou, Y., Li, J., He, Z., Yan, A., Chen, X., & McAuley, J. (2024). Bridging Language and Items for Retrieval and Recommendation. arXiv preprint arXiv:2403.03952.
+
+[2] McAuley Lab, UC San Diego. (2023). Amazon Reviews 2023 Dataset. https://amazon-reviews-2023.github.io/
+
+[3] Salton, G., & Buckley, C. (1988). Term-weighting approaches in automatic text retrieval. Information Processing & Management, 24(5), 513–523.
+
+[4] Ramos, J. (2003). Using TF-IDF to Determine Word Relevance in Document Queries. Proceedings of the First Instructional Conference on Machine Learning.
+
+[5] Cortes, C., & Vapnik, V. (1995). Support-Vector Networks. Machine Learning, 20(3), 273–297.
+
+[6] Bottou, L. (2010). Large-Scale Machine Learning with Stochastic Gradient Descent. Proceedings of COMPSTAT'2010, 177–186.
+
+[7] Pedregosa, F., et al. (2011). Scikit-learn: Machine Learning in Python. Journal of Machine Learning Research, 12, 2825–2830.
+
+[8] Pang, B., & Lee, L. (2008). Opinion Mining and Sentiment Analysis. Foundations and Trends in Information Retrieval, 2(1–2), 1–135.
+
+[9] Medhat, W., Hassan, A., & Korashy, H. (2014). Sentiment analysis algorithms and applications: A survey. Ain Shams Engineering Journal, 5(4), 1093–1113.
+
+[10] Aung, H. H. (2023). Sentiment Analysis of Amazon Product Reviews Using Text Mining. Master's Thesis, University of Debrecen.
+
+[11] Bird, S., Klein, E., & Loper, E. (2009). Natural Language Processing with Python. O'Reilly Media.
+
+[12] Honnibal, M., & Montani, I. (2017). spaCy 2: Natural Language Understanding with Bloom Embeddings, Convolutional Neural Networks and Incremental Parsing.
+
+[13] Pazzani, M. J., & Billsus, D. (2007). Content-Based Recommendation Systems. In The Adaptive Web (pp. 325–341). Springer.
+
+[14] Lops, P., de Gemmis, M., & Semeraro, G. (2011). Content-based Recommender Systems: State of the Art and Trends. In Recommender Systems Handbook (pp. 73–105). Springer.
+
+[15] Sarwar, B., Karypis, G., Konstan, J., & Riedl, J. (2001). Item-based Collaborative Filtering Recommendation Algorithms. Proceedings of WWW '01, 285–295.
+
+[16] Ricci, F., Rokach, L., & Shapira, B. (Eds.). (2015). Recommender Systems Handbook (2nd ed.). Springer.
+
+[17] Koren, Y., Bell, R., & Volinsky, C. (2009). Matrix Factorization Techniques for Recommender Systems. IEEE Computer, 42(8), 30–37.
+
+[18] Cover, T., & Hart, P. (1967). Nearest Neighbor Pattern Classification. IEEE Transactions on Information Theory, 13(1), 21–27.
+
+[19] Johnson, J., Douze, M., & Jégou, H. (2019). Billion-scale similarity search with GPUs. IEEE Transactions on Big Data.
+
+[20] He, X., Deng, K., Wang, X., Li, Y., Zhang, Y., & Wang, M. (2020). LightGCN: Simplifying and Powering Graph Convolution Network for Recommendation. Proceedings of SIGIR '20, 639–648.
+
+[21] Wang, X., He, X., Wang, M., Feng, F., & Chua, T. S. (2019). Neural Graph Collaborative Filtering. Proceedings of SIGIR '19, 165–174.
+
+[22] Sanh, V., Debut, L., Chaumond, J., & Wolf, T. (2019). DistilBERT, a Distilled Version of BERT: Smaller, Faster, Cheaper and Lighter. arXiv preprint arXiv:1910.01108.
+
+[23] Devlin, J., Chang, M. W., Lee, K., & Toutanova, K. (2019). BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. Proceedings of NAACL-HLT, 4171–4186.
+
+[24] Inmon, W. H. (2005). Building the Data Warehouse (4th ed.). Wiley.
+
+[25] Kimball, R., & Ross, M. (2013). The Data Warehouse Toolkit: The Definitive Guide to Dimensional Modeling (3rd ed.). Wiley.
+
+[26] PostgreSQL Global Development Group. (2024). PostgreSQL Documentation. https://www.postgresql.org/docs/
+
+[27] Microsoft. (2024). Power BI Documentation. https://learn.microsoft.com/power-bi/
+
+[28] Streamlit Inc. (2024). Streamlit Documentation. https://docs.streamlit.io
+
+[29] Zaharia, M., et al. (2018). Accelerating the Machine Learning Lifecycle with MLflow. IEEE Data Engineering Bulletin, 41(4), 39–45.
+
+[30] Merkel, D. (2014). Docker: Lightweight Linux Containers for Consistent Development and Deployment. Linux Journal, 2014(239).
+
+[31] Chawla, N. V., Bowyer, K. W., Hall, L. O., & Kegelmeyer, W. P. (2002). SMOTE: Synthetic Minority Over-sampling Technique. Journal of Artificial Intelligence Research, 16, 321–357.
+
+[32] Powers, D. M. W. (2011). Evaluation: From Precision, Recall and F-Measure to ROC, Informedness, Markedness and Correlation. Journal of Machine Learning Technologies, 2(1), 37–63.
+
+[33] McKinney, W. (2010). Data Structures for Statistical Computing in Python. Proceedings of the 9th Python in Science Conference, 56–61.
+
+[34] Harris, C. R., et al. (2020). Array Programming with NumPy. Nature, 585, 357–362.
+
+[35] GitHub, Inc. (2024). GitHub Actions Documentation. https://docs.github.com/actions
