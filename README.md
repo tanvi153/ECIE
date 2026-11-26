@@ -1,32 +1,40 @@
 # Enterprise E-Commerce Intelligence Engine (E-CIE)
 
-[![CI Pipeline](https://github.com/TanviSingla/ECIE/actions/workflows/ci.yml/badge.svg)](https://github.com/TanviSingla/ECIE/actions)
-![Python](https://img.shields.io/badge/Python-3.12%20%7C%203.14-blue.svg)
-![Scikit-Learn](https://img.shields.io/badge/scikit--learn-1.4%2B-orange.svg)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.30%2B-FF4B4B.svg)
-![MLflow](https://img.shields.io/badge/MLflow-Tracking-0194E2.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)
+[![Python](https://img.shields.io/badge/Python-3.12%20%7C%203.14-blue.svg)](https://python.org)
+[![Scikit-Learn](https://img.shields.io/badge/scikit--learn-1.4%2B-orange.svg)](https://scikit-learn.org)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.30%2B-FF4B4B.svg)](https://streamlit.io)
+[![MLflow](https://img.shields.io/badge/MLflow-Tracking-0194E2.svg)](https://mlflow.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://docker.com)
+[![Tests](https://img.shields.io/badge/Tests-14%20Passed-brightgreen.svg)](tests/)
 
-An end-to-end data intelligence and machine learning system for e-commerce enterprises, developed as a **B.Tech Minor Project**. E-CIE combines multi-class customer sentiment classification, content-based product recommendation, and an interactive zero-database web dashboard designed for cloud deployment and live demonstration.
+An end-to-end data intelligence and machine learning system for e-commerce enterprises, developed as a **B.Tech Minor Project**. E-CIE combines multi-class customer sentiment classification, Explainable AI (XAI) feature attribution, smart business-aware product recommendations, and an interactive zero-database web dashboard designed for cloud deployment and live viva demonstration.
 
 ---
 
 ## 📌 Key Capabilities
 
-1. **3-Class Customer Sentiment Classifier**:
+1. **Customer Sentiment Classification Engine**:
    - Classifies customer reviews into **Negative (1-2★)**, **Neutral (3★)**, and **Positive (4-5★)**.
-   - Built on a unified scikit-learn pipeline (`TfidfVectorizer` + `SGDClassifier` with Modified Huber loss).
-   - Strictly derived from star ratings without artificial keyword regex filtering, achieving an **honest 74.84% test accuracy** (Macro F1: 0.7456).
-2. **Content-Based Product Recommender**:
-   - Real-time catalog recommendations using TF-IDF (1-2 n-grams) and `NearestNeighbors` brute-force Cosine Similarity directly over sparse vectors.
-   - Exports and indexes a 60,000-product catalog subset (`data/products_sample.csv`, 6.56 MB) prioritized by review volume.
-3. **Interactive Streamlit Web Dashboard**:
-   - Two feature tabs: **Sentiment Tester** and **Product Recommender**.
-   - Fully decoupled from PostgreSQL for lightweight, memory-safe deployment on Streamlit Community Cloud and Docker containers.
-4. **Production CI/CD & Security**:
+   - Built on a unified scikit-learn pipeline (`TfidfVectorizer` with 200,000 n-grams + `SGDClassifier` with Modified Huber loss).
+   - **5 Lakh Benchmark (Full 3.1M Corpus)**: Evaluated on 100,000 holdout reviews from the full 3.1M dataset, achieving **98.31% test accuracy** with virtually zero overfitting (0.86% generalization gap).
+   - **3-Class Mixed Benchmark**: Evaluated on balanced 1-star to 5-star real-world text, achieving an **honest 79.55% accuracy** (Macro F1: 0.7951).
+2. **Explainable AI (XAI) Feature Attribution**:
+   - Real-time token-level polarity calculation using linear model coefficients and TF-IDF sparse activations.
+   - Highlights positive driver words in green and negative driver words in red, accompanied by mathematical impact weight charts.
+3. **Smart Business-Aware Product Recommender**:
+   - Content-based catalog recommendations using TF-IDF and `NearestNeighbors` Cosine Similarity directly over sparse vectors.
+   - **Smart Business Ranking**: Blends semantic similarity (65%), product star rating (25%), and review volume (10%) to promote highly-rated products over defective items.
+   - Indexes a 60,000-product catalog subset (`data/products_sample.csv`, 6.56 MB) prioritized by review volume.
+4. **Interactive Enterprise Web Application**:
+   - 4-view sidebar navigation:
+     - `📊 Platform Overview`: Executive KPI cards, star rating distributions, and category analytics.
+     - `📝 Review Intelligence & XAI`: Real-time sentiment prediction with Explainable AI word-level attribution.
+     - `📁 Bulk Review Auditor`: Upload `.csv` / `.xlsx` files or load 25 test reviews with 1 click for batch evaluation and CSV export.
+     - `🎯 Smart Product Recommender`: Catalog lookup and natural-language search with quality-weighted ranking.
+   - Fully decoupled from PostgreSQL for zero-latency, cloud memory-safe deployment on Streamlit Community Cloud and Docker containers.
+5. **Production CI/CD & Security**:
    - Automated testing with `pytest` (14 unit/integration tests).
-   - GitHub Actions CI workflow on push and pull requests.
-   - Strict security: no hardcoded credentials or Windows paths; configured via `.env`.
+   - Strict security: zero hardcoded credentials or Windows paths; configured via `.env`.
 
 ---
 
@@ -240,16 +248,25 @@ streamlit run app/streamlit_app.py
 ```
 Open your browser at `http://localhost:8501`.
 
-### App Features:
-- **Tab 1 — Sentiment Tester**:
-  - Live review text area with quick-fill sample buttons.
-  - Class prediction badge (Positive / Neutral / Negative) with estimated star rating.
-  - Horizontal probability distribution bar chart.
-  - Handles empty and short text inputs gracefully.
-- **Tab 2 — Product Recommender**:
+### App Modules:
+- **📊 Platform Overview**:
+  - Executive KPI metric cards (3.1M Ingested Reviews, 60k Catalog, 98.31% Accuracy).
+  - Star rating distribution and sentiment polarity analytics.
+  - Catalog category breakdowns and price tier distribution.
+- **📝 Review Intelligence & XAI**:
+  - Live review text area with quick-fill sample scenarios.
+  - Class prediction badge (Positive / Negative) with confidence score.
+  - **Explainable AI (XAI)**: Inline word highlighting (green positive / red negative) and polarity driver impact charts.
+- **📁 Bulk Review Auditor**:
+  - Batch file upload supporting `.csv`, `.xlsx`, and `.tsv`.
+  - 1-click **"⚡ Load 25 Test Reviews"** button for immediate viva demonstration.
+  - Summary metrics (% happy vs % unhappy, average confidence) and filterable data table.
+  - Download audited CSV report.
+- **🎯 Smart Product Recommender**:
   - Select product from catalog or search using natural language (e.g., *"Countertop Ice Maker"*).
-  - Configurable Top-N recommendation slider (1–15).
-  - Clean results table displaying similarity percentage, title, category, price, and star rating.
+  - **Smart Business Ranking**: Demotes poorly-rated products and promotes trusted, high-volume items.
+  - Interactive minimum star rating filter slider ($1.0\bigstar - 4.5\bigstar$).
+  - Enterprise product cards displaying star ratings, verified review counts, similarity matches, and composite scores.
 
 ---
 
