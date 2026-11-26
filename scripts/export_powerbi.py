@@ -68,6 +68,51 @@ def export_powerbi_data():
     df_price_rating.to_csv(price_rating_path, index=False)
     print(f" Saved {len(df_price_rating):,} rows to {price_rating_path}")
 
+    # 4. Master Unified Report (All-in-One for Power BI Web pasting)
+    print("Exporting master_unified_report (all-in-one table for Power BI Web paste)...")
+    df_master = pd.read_sql(
+        """
+        SELECT 
+            r.category,
+            CASE 
+                WHEN s.store_name IN (
+                    'Anker Direct', 'Sony Official', 'Samsung Electronics', 'Logitech Store', 
+                    'Apple Authorized', 'Bose Sound', 'Spigen Official', 'Amazon Basics', 
+                    'Belkin Tech', 'Corsair Gaming', 'Sennheiser Pro', 'ASUS ROG Store', 
+                    'Razer Official', 'JBL Audio Store', 'Dell Technologies', 'HP Official', 
+                    'Lenovo Authorized', 'TP-Link Networking', 'Netgear Official', 'SanDisk Store', 
+                    'Seagate Storage', 'Western Digital', 'Kingston Tech', 'Crucial Memory', 
+                    'Garmin Fitness'
+                ) THEN s.store_name
+                ELSE 'Other Verified Stores'
+            END AS store_name,
+            EXTRACT(YEAR FROM TO_TIMESTAMP(r.timestamp::numeric / 1000.0))::integer AS review_year,
+            CASE 
+                WHEN p.price < 25.00 THEN '1. Budget (under $25)'
+                WHEN p.price < 75.00 THEN '2. Mid-Range ($25-$75)'
+                WHEN p.price < 150.00 THEN '3. Upper Mid ($75-$150)'
+                ELSE '4. Premium ($150+)'
+            END AS price_tier,
+            ROUND(AVG(p.price), 2) AS avg_price,
+            r.sentiment,
+            COUNT(*) AS review_count,
+            ROUND(AVG(r.rating), 2) AS avg_rating,
+            COUNT(CASE WHEN r.verified_purchase = true THEN 1 END) AS verified_reviews
+        FROM reviews r
+        JOIN products p ON r.parent_asin = p.parent_asin
+        JOIN stores s ON p.store_id = s.store_id
+        WHERE r.timestamp IS NOT NULL
+          AND EXTRACT(YEAR FROM TO_TIMESTAMP(r.timestamp::numeric / 1000.0)) BETWEEN 2012 AND 2023
+        GROUP BY 
+            1, 2, 3, 4, 6
+        ORDER BY review_count DESC;
+        """,
+        conn,
+    )
+    master_path = OUT_DIR / "master_unified_report.csv"
+    df_master.to_csv(master_path, index=False)
+    print(f" Saved {len(df_master):,} rows to {master_path}")
+
     conn.close()
     print("All Power BI datasets successfully exported!")
 
