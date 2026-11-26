@@ -43,6 +43,7 @@ data/processed/*.parquet
 !data/processed/.gitkeep
 !data/products_sample.csv
 !data/powerbi/*.csv
+!data/powerbi/*.tsv
 
 # ==============================================================================
 # Runtime Logs & Temp Files

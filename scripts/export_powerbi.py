@@ -113,6 +113,11 @@ def export_powerbi_data():
     df_master.to_csv(master_path, index=False)
     print(f" Saved {len(df_master):,} rows to {master_path}")
 
+    # Also save as Tab-Separated (TSV) for direct clipboard paste into Power BI Web grid
+    tsv_path = OUT_DIR / "master_unified_report.tsv"
+    df_master.to_csv(tsv_path, sep="\t", index=False)
+    print(f" Saved {len(df_master):,} rows to {tsv_path} (Tab-Separated for Power BI Web paste)")
+
     conn.close()
     print("All Power BI datasets successfully exported!")
 
